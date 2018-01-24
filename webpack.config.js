@@ -2,6 +2,7 @@ var path = require('path')
 var webpack = require('webpack')
 var ExtractTextPlugin = require('extract-text-webpack-plugin')
 var HtmlWebpackPlugin = require('html-webpack-plugin')
+const CleanWebpackPlugin = require("clean-webpack-plugin")
 
 module.exports = {
   entry: {
@@ -14,26 +15,47 @@ module.exports = {
     chunkFilename: 'js/[id].chunk.js'
   },
   module: {
-    loaders: [
+    rules: [
+      {
+        test: /(\.jsx|\.js)$/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: ['env']
+          }
+        },
+        exclude: /node_modules/
+      },
       {
         test: /\.css$/,
-        loader: ExtractTextPlugin.extract('style-loader', 'css-loader')
+        exclude: /node_modules/,
+        use: ExtractTextPlugin.extract({
+          fallback: 'style-loader',
+          use: [
+            {
+              loader: 'css-loader',
+              options: {
+                minimize:true
+              }
+            },
+            {
+              loader: 'postcss-loader'
+            }
+          ]
+        })
       },
       {
-        test: /\.less$/,
-        loader: ExtractTextPlugin.extract('css!less')
+        test: /\.(png|svg|jpg|gif)$/,
+        use: {
+          loader: 'file-loader',
+          options: {
+            name: '[name].[ext]'
+          }
+        }
       },
       {
-        test: /\.html$/,
-        loader: "html-loader" // ?attrs=img:src img:data-src
-      },
-      {
-        test: /\.(woff|woff2|ttf|eot|svg)(\?v=[0-9]\.[0-9]\.[0-9])?$/,
-        loader: 'file-loader?name=./fonts/[name].[ext]'
-      },
-      {
-        test: /\.(png|jpg|gif)$/,
-        loader: 'url-loader?limit=8192&name=./img/[hash].[ext]'
+        test: /\.(woff|woff2|eot|ttf|otf)$/,
+        use: ['file-loader']
       }
     ]
   },
@@ -41,6 +63,7 @@ module.exports = {
     new webpack.ProvidePlugin({
       $: 'jquery'
     }),
+    new CleanWebpackPlugin(["dist"]),
     new webpack.optimize.CommonsChunkPlugin({
       name: 'vendors',
       chunks: ['a'],
@@ -66,6 +89,6 @@ module.exports = {
     host: 'localhost',
     port: 8088,
     inline: true,
-    hot: true,
+    hot: true
   }
 }
