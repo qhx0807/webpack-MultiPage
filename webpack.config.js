@@ -6,11 +6,12 @@ const CleanWebpackPlugin = require("clean-webpack-plugin")
 
 module.exports = {
   entry: {
-    a: './src/views/a/index.js'
+    a: './src/views/a/index.js',
+    login: './src/pages/login/index.js'
   },
   output: {
     path: path.join(__dirname, 'dist'),
-    publicPath: '/dist/',
+    publicPath: '../',
     filename: 'js/[name].js',
     chunkFilename: 'js/[id].chunk.js'
   },
@@ -25,6 +26,10 @@ module.exports = {
           }
         },
         exclude: /node_modules/
+      },
+      {
+        test: /\.html$/,
+        use: ['html-loader']
       },
       {
         test: /\.css$/,
@@ -64,11 +69,11 @@ module.exports = {
       $: 'jquery'
     }),
     new CleanWebpackPlugin(["dist"]),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendors',
-      chunks: ['a'],
-      minChunks: 3
-    }),
+    // new webpack.optimize.CommonsChunkPlugin({
+    //   name: 'vendors',
+    //   chunks: ['a'],
+    //   minChunks: 3
+    // }),
     new ExtractTextPlugin('css/[name].css'),
     new HtmlWebpackPlugin({
       favicon: './src/image/favicon.ico',
@@ -76,7 +81,18 @@ module.exports = {
       template: './src/views/a/a.html',
       inject: 'body',
       hash: true,
-      chunks: ['vendors', 'index'],
+      chunks: ['a'],
+      minify: {
+        removeComments: true,
+        collapseWhitespace: false
+      }
+    }),
+    new HtmlWebpackPlugin({
+      filename: './index.html',
+      template: './src/pages/login/index.html',
+      inject: 'body',
+      hash: true,
+      chunks: ['login'],
       minify: {
         removeComments: true,
         collapseWhitespace: false
@@ -85,10 +101,11 @@ module.exports = {
     new webpack.HotModuleReplacementPlugin()
   ],
   devServer: {
-    contentBase: './',
+    contentBase: './dist/',
     host: 'localhost',
     port: 8088,
     inline: true,
-    hot: true
+    hot: true,
+    compress: true
   }
 }
